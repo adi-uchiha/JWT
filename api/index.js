@@ -26,7 +26,10 @@ app.post("/api/login",(req,res)=>{
         }
     });
     if(user){
-        const token = jwt.sign({id:user.id, isAdmin:user.isAdmin}, "mysupersecretkey")
+        const token = jwt.sign({id:user.id, isAdmin:user.isAdmin},
+             "mysupersecretkey",
+             {expiresIn: "20s"})
+             //Token will expire in 20 seconds
         res.status(200).json({
             username : user.username,
             isAdmin: user.isAdmin,
@@ -44,10 +47,11 @@ const verify = (req,res,next) =>{
     console.log(authHeader)
     if(authHeader){
         const token = authHeader.split(" ")[1]
-        jwt.verify(token, "mysupersecretkey", (err, user)=>{ //user is the returned payload(id, isAdmin)
-            //user is the name of the object containing the id and isAdmin
+        jwt.verify(token, "mysupersecretkey", (err, user)=>{ 
+            //User is the returned payload(id, isAdmin)
+            //User is the name of the object containing the id and isAdmin
             if(err){
-                res.status(402).json("Token not verified")
+                res.status(403).json("Token not valid")
             }
 
             req.user = user //assigining the found payload to req body so to use in the further request
